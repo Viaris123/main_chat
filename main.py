@@ -7,3 +7,4 @@ def say_goodbye():
 
 
 say_hallo()
+say_goodbye()
