@@ -12,7 +12,7 @@ while True:
     state = input("Press 'x' to exit. Press any key to continue.")
     if state == 'x':
         break
-    outMsg = get_message()
+    outMsg = input("::: Enter message: ")
     client.sendall(outMsg)
     inMsg = client.recv(1024)
     print(inMsg.decode())
