@@ -13,7 +13,7 @@ while True:
     if state == 'x':
         break
     outMsg = input("::: Enter message: ")
-    client.sendall(outMsg)
+    client.sendall(outMsg.encode())
     inMsg = client.recv(1024)
     print(inMsg.decode())
 

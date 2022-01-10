@@ -18,7 +18,7 @@ while True:
 
         if conn == sock:
             new_client, client_addr = conn.accept()
-            print(f':::Connection from {new_client} successful:::')
+            print(f':::Connection from {client_addr} successful:::')
             new_client.setblocking(False)
             inputs.append(new_client)
         else:
