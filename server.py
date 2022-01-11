@@ -22,7 +22,11 @@ while True:
             new_client.setblocking(False)
             inputs.append(new_client)
         else:
-            incom_msg = conn.recv(1024)
+            try:
+                incom_msg = conn.recv(1024)
+            except ConnectionResetError:
+                incom_msg = None
+                print(':::Connection failed!:::')
             if incom_msg:
                 messages[conn] = incom_msg
                 if conn not in outputs:
@@ -39,7 +43,7 @@ while True:
     for conn in send_list:
         msg = messages.get(conn, None)
 
-        if len(msg):
+        if msg is not None:
             conn.send(msg)
         else:
             outputs.remove(conn)
