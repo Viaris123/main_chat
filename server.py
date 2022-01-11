@@ -12,9 +12,9 @@ messages = {}
 print(":::Sever is listening...:::")
 
 while True:
-    r_list, w_list, ex_list = select.select(inputs, outputs, inputs)
+    read_list, send_list, ex_list = select.select(inputs, outputs, inputs)
 
-    for conn in r_list:
+    for conn in read_list:
 
         if conn == sock:
             new_client, client_addr = conn.accept()
@@ -24,10 +24,7 @@ while True:
         else:
             incom_msg = conn.recv(1024)
             if incom_msg:
-                if messages.get(conn, None):
-                    messages[conn].append(incom_msg)
-                else:
-                    messages[conn] = incom_msg
+                messages[conn] = incom_msg
                 if conn not in outputs:
                     outputs.append(conn)
             else:
@@ -35,10 +32,11 @@ while True:
                 inputs.remove(conn)
                 if conn in outputs:
                     outputs.remove(conn)
-                #del messages[conn]
-                conn.close()
 
-    for conn in w_list:
+                conn.close()
+                del messages[conn]
+
+    for conn in send_list:
         msg = messages.get(conn, None)
 
         if len(msg):
@@ -53,3 +51,4 @@ while True:
         if conn in outputs:
             outputs.remove(conn)
         conn.close()
+        del messages[conn]
