@@ -1,20 +1,28 @@
 import socket
+import threading
 
 
-def get_message():
-    msg = input("::: Enter message: ")
-    return msg.encode()
+def send_msg(sock):
+    while True:
+        msg = input("\n::: Enter message: ")
+        if msg == 'x':
+            return
+        sock.send(msg.encode())
+
+def recv_msg(sock):
+    while True:
+        msg = sock.recv(1024)
+        print("\n")
+        print(msg.decode())
 
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect(('127.198.0.0', 1234))
-while True:
-    state = input("Press 'x' to exit. Press any key to continue.")
-    if state == 'x':
-        break
-    outMsg = input("::: Enter message: ")
-    client.sendall(outMsg.encode())
-    inMsg = client.recv(1024)
-    print(inMsg.decode())
+client.connect(('127.0.0.1', 8008))
+s = threading.Thread(target=send_msg, args=(client, ))
+s.start()
+r = threading.Thread(target=recv_msg, args=(client, ))
+r.start()
+s.join()
+r.join()
 
 client.close()
