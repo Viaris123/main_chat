@@ -7,19 +7,19 @@ import json
 class Messages:
 
     def __init__(self):
-        self.messageas = list()
+        self.messages = list()
         self.consumer_lock = threading.Lock()
         self.producer_lock = threading.Lock()
 
     def set_message(self, message):
         self.producer_lock.acquire()
-        self.messageas.append(message)
+        self.messages.append(message)
         self.producer_lock.release()
 
     def print_messages(self):
         self.consumer_lock.acquire()
         # os.system('cls')
-        for msg in self.messageas:
+        for msg in self.messages:
             print(f"From: {msg[0]} ::: {msg[1]}")
         self.consumer_lock.release()
 
@@ -51,7 +51,7 @@ class IncomMsg(threading.Thread):
     def recv_msg(self):
         while True:
             incom_msg = self.sock.recv(2048)
-            msg = json.loads(incom_msg, encodings='utf-8')
+            msg = json.loads(incom_msg)
             self.messages.set_message(msg)
 
 
@@ -73,18 +73,18 @@ def main():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect(('127.0.0.1', 8008))
     messages = Messages()
-    thread1 = ShowMsgHistory(messages)
+    #thread1 = ShowMsgHistory(messages)
     thread2 = IncomMsg(sock, messages)
     thread3 = SendMsg(sock)
 
-    thread1.start()
-    thread2.start()
+    #thread1.start()
+    #thread2.start()
     thread3.start()
 
-    thread1.join()
-    thread2.join()
+    #thread1.join()
+    #thread2.join()
     thread3.join()
-    sock.close()
+    #sock.close()
 
 
 main()
