@@ -1,28 +1,90 @@
 import socket
 import threading
+import os
+import json
 
 
-def send_msg(sock):
-    while True:
-        msg = input("\n::: Enter message: ")
-        if msg == 'x':
-            return
-        sock.send(msg.encode())
+class Messages:
 
-def recv_msg(sock):
-    while True:
-        msg = sock.recv(1024)
-        print("\n")
-        print(msg.decode())
+    def __init__(self):
+        self.messageas = list()
+        self.consumer_lock = threading.Lock()
+        self.producer_lock = threading.Lock()
+
+    def set_message(self, message):
+        self.producer_lock.acquire()
+        self.messageas.append(message)
+        self.producer_lock.release()
+
+    def print_messages(self):
+        self.consumer_lock.acquire()
+        # os.system('cls')
+        for msg in self.messageas:
+            print(f"From: {msg[0]} ::: {msg[1]}")
+        self.consumer_lock.release()
 
 
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect(('127.0.0.1', 8008))
-s = threading.Thread(target=send_msg, args=(client, ))
-s.start()
-r = threading.Thread(target=recv_msg, args=(client, ))
-r.start()
-s.join()
-r.join()
+class ShowMsgHistory(threading.Thread):
 
-client.close()
+    def __init__(self, messages):
+        threading.Thread.__init__(self)
+        self.messages = messages
+
+    def run(self):
+        self.print_msg_history()
+
+    def print_msg_history(self):
+        while True:
+            self.messages.print_messages()
+
+
+class IncomMsg(threading.Thread):
+
+    def __init__(self, sock, messages):
+        threading.Thread.__init__(self)
+        self.sock = sock
+        self.messages = messages
+
+    def run(self):
+        self.recv_msg()
+
+    def recv_msg(self):
+        while True:
+            incom_msg = self.sock.recv(2048)
+            msg = json.loads(incom_msg, encodings='utf-8')
+            self.messages.set_message(msg)
+
+
+class SendMsg(threading.Thread):
+
+    def __init__(self, sock):
+        threading.Thread.__init__(self)
+        self.sock = sock
+
+    def run(self):
+        self.send_msg()
+
+    def send_msg(self):
+        msg = input("Type some text: ")
+        self.sock.send(msg.encode('utf-8'))
+
+
+def main():
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect(('127.0.0.1', 8008))
+    messages = Messages()
+    thread1 = ShowMsgHistory(messages)
+    thread2 = IncomMsg(sock, messages)
+    thread3 = SendMsg(sock)
+
+    thread1.start()
+    thread2.start()
+    thread3.start()
+
+    thread1.join()
+    thread2.join()
+    thread3.join()
+    sock.close()
+
+
+main()
