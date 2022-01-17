@@ -28,6 +28,7 @@ class ShowMsgHistory(threading.Thread):
 
     def __init__(self, messages):
         threading.Thread.__init__(self)
+        self.msg_list_len = 0
         self.messages = messages
 
     def run(self):
@@ -35,7 +36,11 @@ class ShowMsgHistory(threading.Thread):
 
     def print_msg_history(self):
         while True:
-            self.messages.print_messages()
+            if self.msg_list_len <= len(self.messages.messages):
+                self.messages.print_messages()
+                self.msg_list_len +=1
+            else:
+                continue
 
 
 class IncomMsg(threading.Thread):
@@ -65,26 +70,28 @@ class SendMsg(threading.Thread):
         self.send_msg()
 
     def send_msg(self):
-        msg = input("Type some text: ")
-        self.sock.send(msg.encode('utf-8'))
+        while True:
+
+            msg = input("Type some text: ")
+            self.sock.send(msg.encode('utf-8'))
 
 
 def main():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect(('127.0.0.1', 8008))
     messages = Messages()
-    #thread1 = ShowMsgHistory(messages)
+    thread1 = ShowMsgHistory(messages)
     thread2 = IncomMsg(sock, messages)
     thread3 = SendMsg(sock)
 
-    #thread1.start()
-    #thread2.start()
+    thread1.start()
+    thread2.start()
     thread3.start()
 
-    #thread1.join()
-    #thread2.join()
+    thread1.join()
+    thread2.join()
     thread3.join()
-    #sock.close()
+    sock.close()
 
 
 main()
