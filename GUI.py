@@ -10,6 +10,7 @@ def add_to_list(list_m): # fake incoming messages
     for i in range(15):
         list_m.append(i)
         window['--OUTPUT--'].update(list1)
+        window['--OUTPUT--'].set_vscroll_position(1.0)
         time.sleep(8)
 
 
@@ -34,6 +35,7 @@ while True:
     if event == 'Send':
         list1.append(value[0])
         window['--OUTPUT--'].update(list1)
+        window['--OUTPUT--'].set_vscroll_position(1.0)
 
 
 window.close()

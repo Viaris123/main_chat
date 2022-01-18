@@ -5,8 +5,11 @@ import json
 
 def incom_msg():
     while True:
-        msg= sock.recv(2048)
-        print(msg.decode('utf-8'))
+        data = sock.recv(2048)
+        msg_tuple = json.loads(data, encoding='utf-8')
+        msg_text = msg_tuple[1]
+        msg_adr = msg_tuple[0]
+        print(msg_text, ' from ', msg_adr)
 
 
 def client_pipeline():

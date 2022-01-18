@@ -14,9 +14,12 @@ def send_msg(msg):
 
 def msg_pipeline(user_conn):
     while True:
-        msg = user_conn.recv(2048)
-        print(msg.decode('utf-8'), " from ", user_conn.getpeername())
-        send_msg(msg)
+        data = user_conn.recv(2048)
+        msg = data.decode('utf-8')
+        user_adr = user_conn.getpeername()
+        print(msg, " from ", user_adr)
+        msg_to_send = json.dumps((user_adr, msg)).encode('utf-8')
+        send_msg(msg_to_send)
 
 
 def server_start():
