@@ -16,6 +16,7 @@ def add_to_list(list_m): # fake incoming messages
 
 sg.theme('DarkAmber')
 
+
 list1 = ['fghytht', '56khlb', 'j5uuvk5k', 'tkklcxlel']
 
 layout = [[sg.Listbox(list1, size=(50, 10), key='--OUTPUT--')],
