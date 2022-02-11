@@ -4,7 +4,7 @@ import socket
 import json
 import PySimpleGUI as sg
 
-M_LIST = list()
+MESSAGES = list()
 sg.theme('DarkAmber')
 
 
@@ -14,37 +14,37 @@ def incom_msg():
         msg_tuple = json.loads(data, encoding='utf-8')
         # msg_text = msg_tuple[1]
         # msg_adr = msg_tuple[0]
-        M_LIST.append(msg_tuple)
-        window['--LIST--'].update(M_LIST)
+        MESSAGES.append(msg_tuple)
+        window['--LIST--'].update(MESSAGES)
         window['--LIST--'].set_vscroll_position(1.0)
-
-
-# def client_pipeline():
-#     while True:
-#         thread1 = threading.Thread(target=incom_msg, daemon=True)
-#         thread1.start()
-#
-#         sock.send(input("Enter message: ").encode('utf-8'))
 
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.connect(('127.0.0.1', 8008))
 
+username = sg.popup_get_text('Enter username')
+sock.send(username.encode('utf-8'))
 
-layout = [[sg.Listbox(M_LIST, size=(50, 10), key='--LIST--')],
+layout = [[sg.Text(username)],
+          [sg.Listbox(MESSAGES, size=(50, 10), key='--LIST--')],
           [sg.Input(size=(50, 2), do_not_clear=False)],
           [sg.Button('Send'), sg.Button('Exit')]
           ]
-window = sg.Window('Chat V1.0', layout)
+window = sg.Window('Chat V1.1', layout)
 thread1 = threading.Thread(target=incom_msg, daemon=True)
 thread1.start()
+user_name = sg.popup_get_text('Enter user name:')
 while True:
     event, value = window.read()
     if event == 'Exit' or event == sg.WINDOW_CLOSED:
         break
 
     if event == 'Send':
-        sock.send(value[0].encode('utf-8'))
+        try:
+            sock.send(value[0].encode('utf-8'))
+        except ConnectionResetError:
+            sg.popup('Oops... Server is not responding!')
+            continue
 
 window.close()
 sock.close()
